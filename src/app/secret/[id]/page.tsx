@@ -192,7 +192,7 @@ export default function ViewSecret() {
   }
 
   const secret = secretQuery.data;
-  const requiresPassword = secret?.password && !isRevealed;
+  const requiresPassword = Boolean(secret?.password) && !isRevealed;
 
   return (
     <Box
@@ -230,7 +230,9 @@ export default function ViewSecret() {
             <Typography variant="body1" color="text.secondary">
               {isRevealed
                 ? "Here is your secret content"
-                : "Enter the password to reveal the secret"}
+                : requiresPassword
+                  ? "Enter the password to reveal the secret"
+                  : "Click the button below to reveal the secret"}
             </Typography>
           </Box>
 
