@@ -28,16 +28,26 @@ export function SecretForm() {
   const { enqueueSnackbar } = useSnackbar();
 
   // Zustand store state and actions
-  const formState = useSecretStore((state) => state.form);
-  const actions = useSecretStore((state) => state.actions);
-  const isFormValid = useSecretStore((state) => state.computed.isFormValid());
-  const secretUrl = useSecretStore((state) => state.computed.getSecretUrl());
+  const {
+    content,
+    password,
+    oneTimeAccess,
+    createdSecret,
+    setContent,
+    setPassword,
+    setOneTimeAccess,
+    setCreatedSecret,
+    resetForm,
+  } = useSecretStore();
+
+  const isFormValid = useSecretStore((state) => state.isFormValid());
+  const secretUrl = useSecretStore((state) => state.getSecretUrl());
 
   const createSecret = api.secret.create.useMutation({
     onSuccess: async (data) => {
       await utils.secret.invalidate();
-      actions.setCreatedSecret(data.id);
-      actions.resetForm();
+      setCreatedSecret(data.id);
+      resetForm();
       enqueueSnackbar(
         "Secret created successfully! Share the link with your recipient.",
         { variant: "success" },
@@ -73,18 +83,12 @@ export function SecretForm() {
       if (!isFormValid) return;
 
       createSecret.mutate({
-        content: formState.content,
-        password: formState.password || undefined,
-        oneTimeAccess: formState.oneTimeAccess,
+        content: content,
+        password: password || undefined,
+        oneTimeAccess: oneTimeAccess,
       });
     },
-    [
-      createSecret,
-      formState.content,
-      formState.password,
-      formState.oneTimeAccess,
-      isFormValid,
-    ],
+    [createSecret, content, password, oneTimeAccess, isFormValid],
   );
 
   return (
@@ -119,7 +123,7 @@ export function SecretForm() {
         </Typography>
       </Box>
 
-      {formState.createdSecret && secretUrl && (
+      {createdSecret && secretUrl && (
         <Alert
           severity="success"
           sx={{ mb: 3 }}
@@ -152,8 +156,8 @@ export function SecretForm() {
           rows={4}
           label="Secret Message"
           placeholder="Enter your secret message..."
-          value={formState.content}
-          onChange={(e) => actions.setContent(e.target.value)}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
           required
           variant="outlined"
           helperText="This message will be encrypted and can only be viewed by the recipient"
@@ -164,8 +168,8 @@ export function SecretForm() {
           type="password"
           label="Password Protection (Optional)"
           placeholder="Add an extra layer of security"
-          value={formState.password}
-          onChange={(e) => actions.setPassword(e.target.value)}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           variant="outlined"
           slotProps={{
             input: {
@@ -189,8 +193,8 @@ export function SecretForm() {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formState.oneTimeAccess}
-                onChange={(e) => actions.setOneTimeAccess(e.target.checked)}
+                checked={oneTimeAccess}
+                onChange={(e) => setOneTimeAccess(e.target.checked)}
                 color="primary"
               />
             }

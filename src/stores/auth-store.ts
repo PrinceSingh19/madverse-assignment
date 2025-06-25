@@ -1,66 +1,40 @@
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
-// Authentication Store
-
-// Types for form state
-interface AuthFormState {
-  email: string;
-  password: string;
-  name?: string;
-  showPassword: boolean;
-}
-
-interface AuthStore {
+type State = {
   // Sign In
-  signIn: AuthFormState;
+  signInEmail: string;
+  signInPassword: string;
+  signInShowPassword: boolean;
 
   // Registration
-  register: AuthFormState & {
-    name: string;
-  };
-
-  // Actions for Sign In
-  signInActions: {
-    setEmail: (email: string) => void;
-    setPassword: (password: string) => void;
-    togglePasswordVisibility: () => void;
-    resetForm: () => void;
-  };
-
-  // Actions for Registration
-  registerActions: {
-    setEmail: (email: string) => void;
-    setPassword: (password: string) => void;
-    setName: (name: string) => void;
-    togglePasswordVisibility: () => void;
-    resetForm: () => void;
-  };
-
-  // Form validation
-  computed: {
-    isSignInFormValid: () => boolean;
-    isRegisterFormValid: () => boolean;
-    getPasswordStrength: (password: string) => {
-      strength: number;
-      label: string;
-    };
-  };
-}
-
-// Initial state
-const initialSignInState: AuthFormState = {
-  email: "",
-  password: "",
-  showPassword: false,
+  registerEmail: string;
+  registerPassword: string;
+  registerName: string;
+  registerShowPassword: boolean;
 };
 
-const initialRegisterState: AuthFormState & { name: string } = {
-  email: "",
-  password: "",
-  name: "",
-  showPassword: false,
+type Actions = {
+  // Sign In Actions
+  setSignInEmail: (email: string) => void;
+  setSignInPassword: (password: string) => void;
+  toggleSignInPasswordVisibility: () => void;
+  resetSignInForm: () => void;
+
+  // Registration Actions
+  setRegisterEmail: (email: string) => void;
+  setRegisterPassword: (password: string) => void;
+  setRegisterName: (name: string) => void;
+  toggleRegisterPasswordVisibility: () => void;
+  resetRegisterForm: () => void;
+
+  // Form validation
+  isSignInFormValid: () => boolean;
+  isRegisterFormValid: () => boolean;
+  getPasswordStrength: (password: string) => {
+    strength: number;
+    label: string;
+  };
 };
 
 // Password strength check
@@ -84,81 +58,82 @@ const calculatePasswordStrength = (password: string) => {
   return { strength, label: "Strong" };
 };
 
-export const useAuthStore = create<AuthStore>()(
-  devtools(
-    immer((set, get) => ({
-      // Initial state
-      signIn: initialSignInState,
-      register: initialRegisterState,
+export const useAuthStore = create<State & Actions>()(
+  immer((set, get) => ({
+    // Sign In initial state
+    signInEmail: "",
+    signInPassword: "",
+    signInShowPassword: false,
 
-      // Sign In
-      signInActions: {
-        setEmail: (email) =>
-          set((state) => {
-            state.signIn.email = email;
-          }),
+    // Registration initial state
+    registerEmail: "",
+    registerPassword: "",
+    registerName: "",
+    registerShowPassword: false,
 
-        setPassword: (password) =>
-          set((state) => {
-            state.signIn.password = password;
-          }),
+    // Sign In Actions
+    setSignInEmail: (email: string) =>
+      set((state) => {
+        state.signInEmail = email;
+      }),
 
-        togglePasswordVisibility: () =>
-          set((state) => {
-            state.signIn.showPassword = !state.signIn.showPassword;
-          }),
+    setSignInPassword: (password: string) =>
+      set((state) => {
+        state.signInPassword = password;
+      }),
 
-        resetForm: () =>
-          set((state) => {
-            state.signIn = { ...initialSignInState };
-          }),
-      },
+    toggleSignInPasswordVisibility: () =>
+      set((state) => {
+        state.signInShowPassword = !state.signInShowPassword;
+      }),
 
-      // Registration
-      registerActions: {
-        setEmail: (email) =>
-          set((state) => {
-            state.register.email = email;
-          }),
+    resetSignInForm: () =>
+      set((state) => {
+        state.signInEmail = "";
+        state.signInPassword = "";
+        state.signInShowPassword = false;
+      }),
 
-        setPassword: (password) =>
-          set((state) => {
-            state.register.password = password;
-          }),
+    // Registration Actions
+    setRegisterEmail: (email: string) =>
+      set((state) => {
+        state.registerEmail = email;
+      }),
 
-        setName: (name) =>
-          set((state) => {
-            state.register.name = name;
-          }),
+    setRegisterPassword: (password: string) =>
+      set((state) => {
+        state.registerPassword = password;
+      }),
 
-        togglePasswordVisibility: () =>
-          set((state) => {
-            state.register.showPassword = !state.register.showPassword;
-          }),
+    setRegisterName: (name: string) =>
+      set((state) => {
+        state.registerName = name;
+      }),
 
-        resetForm: () =>
-          set((state) => {
-            state.register = { ...initialRegisterState };
-          }),
-      },
+    toggleRegisterPasswordVisibility: () =>
+      set((state) => {
+        state.registerShowPassword = !state.registerShowPassword;
+      }),
 
-      // Form validation
-      computed: {
-        isSignInFormValid: () => {
-          const { signIn } = get();
-          return signIn.email.trim() !== "" && signIn.password.trim() !== "";
-        },
+    resetRegisterForm: () =>
+      set((state) => {
+        state.registerEmail = "";
+        state.registerPassword = "";
+        state.registerName = "";
+        state.registerShowPassword = false;
+      }),
 
-        isRegisterFormValid: () => {
-          const { register } = get();
-          return register.email.trim() !== "" && register.password.length >= 6;
-        },
-
-        getPasswordStrength: calculatePasswordStrength,
-      },
-    })),
-    {
-      name: "auth-store",
+    // Form validation
+    isSignInFormValid: () => {
+      const { signInEmail, signInPassword } = get();
+      return signInEmail.trim() !== "" && signInPassword.trim() !== "";
     },
-  ),
+
+    isRegisterFormValid: () => {
+      const { registerEmail, registerPassword } = get();
+      return registerEmail.trim() !== "" && registerPassword.length >= 6;
+    },
+
+    getPasswordStrength: calculatePasswordStrength,
+  })),
 );

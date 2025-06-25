@@ -30,11 +30,17 @@ export default function SignIn() {
   const { enqueueSnackbar } = useSnackbar();
 
   // Zustand store state and actions
-  const signInState = useAuthStore((state) => state.signIn);
-  const signInActions = useAuthStore((state) => state.signInActions);
-  const isFormValid = useAuthStore((state) =>
-    state.computed.isSignInFormValid(),
-  );
+  const {
+    signInEmail: email,
+    signInPassword: password,
+    signInShowPassword: showPassword,
+    setSignInEmail: setEmail,
+    setSignInPassword: setPassword,
+    toggleSignInPasswordVisibility: togglePasswordVisibility,
+    resetSignInForm: resetForm,
+  } = useAuthStore();
+
+  const isFormValid = useAuthStore((state) => state.isSignInFormValid());
 
   // Memoized submit handler - let NextAuth handle loading/error states
   const handleSubmit = useCallback(
@@ -45,8 +51,8 @@ export default function SignIn() {
 
       try {
         const result = await signIn("credentials", {
-          email: signInState.email,
-          password: signInState.password,
+          email: email,
+          password: password,
           redirect: false,
         });
 
@@ -59,23 +65,16 @@ export default function SignIn() {
             "Welcome back! You have been signed in successfully.",
             { variant: "success" },
           );
-          signInActions.resetForm();
+          resetForm();
           router.push("/");
         }
-      } catch (err) {
+      } catch {
         enqueueSnackbar("An unexpected error occurred. Please try again.", {
           variant: "error",
         });
       }
     },
-    [
-      signInState.email,
-      signInState.password,
-      isFormValid,
-      signInActions,
-      router,
-      enqueueSnackbar,
-    ],
+    [email, password, isFormValid, resetForm, router, enqueueSnackbar],
   );
 
   return (
@@ -131,8 +130,8 @@ export default function SignIn() {
               id="email"
               label="Email Address"
               type="email"
-              value={signInState.email}
-              onChange={(e) => signInActions.setEmail(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               variant="outlined"
               slotProps={{
@@ -151,9 +150,9 @@ export default function SignIn() {
               fullWidth
               id="password"
               label="Password"
-              type={signInState.showPassword ? "text" : "password"}
-              value={signInState.password}
-              onChange={(e) => signInActions.setPassword(e.target.value)}
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               variant="outlined"
               slotProps={{
@@ -166,15 +165,11 @@ export default function SignIn() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        onClick={signInActions.togglePasswordVisibility}
+                        onClick={togglePasswordVisibility}
                         edge="end"
                         sx={{ color: "text.secondary" }}
                       >
-                        {signInState.showPassword ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
                   ),

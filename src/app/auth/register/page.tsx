@@ -33,18 +33,24 @@ export default function Register() {
   const { enqueueSnackbar } = useSnackbar();
 
   // Zustand store state and actions
-  const registerState = useAuthStore((state) => state.register);
-  const registerActions = useAuthStore((state) => state.registerActions);
-  const isFormValid = useAuthStore((state) =>
-    state.computed.isRegisterFormValid(),
-  );
-  const getPasswordStrength = useAuthStore(
-    (state) => state.computed.getPasswordStrength,
-  );
+  const {
+    registerEmail: email,
+    registerPassword: password,
+    registerName: name,
+    registerShowPassword: showPassword,
+    setRegisterEmail: setEmail,
+    setRegisterPassword: setPassword,
+    setRegisterName: setName,
+    toggleRegisterPasswordVisibility: togglePasswordVisibility,
+    resetRegisterForm: resetForm,
+    getPasswordStrength,
+  } = useAuthStore();
+
+  const isFormValid = useAuthStore((state) => state.isRegisterFormValid());
 
   const registerMutation = api.auth.register.useMutation({
     onSuccess: () => {
-      registerActions.resetForm();
+      resetForm();
       enqueueSnackbar(
         "Account created successfully! Please sign in with your new credentials.",
         { variant: "success" },
@@ -66,7 +72,7 @@ export default function Register() {
 
       if (!isFormValid) return;
 
-      if (registerState.password.length < 6) {
+      if (password.length < 6) {
         enqueueSnackbar("Password must be at least 6 characters long", {
           variant: "error",
         });
@@ -74,23 +80,16 @@ export default function Register() {
       }
 
       registerMutation.mutate({
-        email: registerState.email,
-        password: registerState.password,
-        name: registerState.name || undefined,
+        email: email,
+        password: password,
+        name: name || undefined,
       });
     },
-    [
-      registerState.email,
-      registerState.password,
-      registerState.name,
-      isFormValid,
-      registerMutation,
-      enqueueSnackbar,
-    ],
+    [email, password, name, isFormValid, registerMutation, enqueueSnackbar],
   );
 
   // Get password strength from Zustand store
-  const passwordStrength = getPasswordStrength(registerState.password);
+  const passwordStrength = getPasswordStrength(password);
 
   return (
     <Box
@@ -151,8 +150,8 @@ export default function Register() {
               id="name"
               label="Full Name (Optional)"
               type="text"
-              value={registerState.name}
-              onChange={(e) => registerActions.setName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               variant="outlined"
               slotProps={{
                 input: {
@@ -171,8 +170,8 @@ export default function Register() {
               id="email"
               label="Email Address"
               type="email"
-              value={registerState.email}
-              onChange={(e) => registerActions.setEmail(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               variant="outlined"
               slotProps={{
@@ -192,9 +191,9 @@ export default function Register() {
                 fullWidth
                 id="password"
                 label="Password"
-                type={registerState.showPassword ? "text" : "password"}
-                value={registerState.password}
-                onChange={(e) => registerActions.setPassword(e.target.value)}
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 variant="outlined"
                 slotProps={{
@@ -207,15 +206,11 @@ export default function Register() {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          onClick={registerActions.togglePasswordVisibility}
+                          onClick={togglePasswordVisibility}
                           edge="end"
                           sx={{ color: "text.secondary" }}
                         >
-                          {registerState.showPassword ? (
-                            <VisibilityOff />
-                          ) : (
-                            <Visibility />
-                          )}
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -225,7 +220,7 @@ export default function Register() {
                 helperText="Password must be at least 6 characters long"
               />
 
-              {registerState.password && (
+              {password && (
                 <Box sx={{ mt: 2 }}>
                   <Box
                     sx={{
