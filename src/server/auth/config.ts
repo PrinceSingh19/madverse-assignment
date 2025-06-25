@@ -90,5 +90,4 @@ export const authConfig = {
     }),
   },
   debug: process.env.NODE_ENV === "development",
-  trustHost: true,
 } satisfies NextAuthConfig;
