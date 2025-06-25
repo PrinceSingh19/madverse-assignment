@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 
 import { type Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
+import { SnackbarProviderWrapper } from "@/providers/SnackbarProvider";
 
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { TRPCReactProvider } from "@/trpc/react";
@@ -21,7 +22,9 @@ export default function RootLayout({
         <SessionProvider>
           <TRPCReactProvider>
             <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-              <MuiThemeProvider>{children}</MuiThemeProvider>
+              <MuiThemeProvider>
+                <SnackbarProviderWrapper>{children}</SnackbarProviderWrapper>
+              </MuiThemeProvider>
             </AppRouterCacheProvider>
           </TRPCReactProvider>
         </SessionProvider>

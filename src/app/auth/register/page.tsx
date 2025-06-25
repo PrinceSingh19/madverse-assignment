@@ -26,9 +26,11 @@ import {
 } from "@mui/icons-material";
 import { api } from "@/trpc/react";
 import { useAuthStore } from "@/stores";
+import { useSnackbar } from "notistack";
 
 export default function Register() {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
 
   // Zustand store state and actions
   const registerState = useAuthStore((state) => state.register);
@@ -43,12 +45,17 @@ export default function Register() {
   const registerMutation = api.auth.register.useMutation({
     onSuccess: () => {
       registerActions.resetForm();
-      router.push(
-        "/auth/signin?message=Registration successful! Please sign in.",
+      enqueueSnackbar(
+        "Account created successfully! Please sign in with your new credentials.",
+        { variant: "success" },
       );
+      router.push("/auth/signin");
     },
     onError: (error) => {
-      console.error("Registration failed:", error.message);
+      enqueueSnackbar(
+        error.message || "Failed to create account. Please try again.",
+        { variant: "error" },
+      );
     },
   });
 
@@ -60,7 +67,9 @@ export default function Register() {
       if (!isFormValid) return;
 
       if (registerState.password.length < 6) {
-        console.error("Password must be at least 6 characters long");
+        enqueueSnackbar("Password must be at least 6 characters long", {
+          variant: "error",
+        });
         return;
       }
 
@@ -76,6 +85,7 @@ export default function Register() {
       registerState.name,
       isFormValid,
       registerMutation,
+      enqueueSnackbar,
     ],
   );
 

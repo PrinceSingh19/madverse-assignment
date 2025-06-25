@@ -20,10 +20,12 @@ import {
 } from "@mui/icons-material";
 import { api } from "@/trpc/react";
 import { useSecretStore } from "@/stores";
+import { useSnackbar } from "notistack";
 
 // Secret creation form
 export function SecretForm() {
   const utils = api.useUtils();
+  const { enqueueSnackbar } = useSnackbar();
 
   // Zustand store state and actions
   const formState = useSecretStore((state) => state.form);
@@ -36,18 +38,34 @@ export function SecretForm() {
       await utils.secret.invalidate();
       actions.setCreatedSecret(data.id);
       actions.resetForm();
+      enqueueSnackbar(
+        "Secret created successfully! Share the link with your recipient.",
+        { variant: "success" },
+      );
     },
     onError: (error) => {
-      console.error("Failed to create secret:", error.message);
+      enqueueSnackbar(
+        error.message || "Failed to create secret. Please try again.",
+        { variant: "error" },
+      );
     },
   });
 
   // Event handlers
   const copyToClipboard = useCallback(async () => {
     if (secretUrl) {
-      await navigator.clipboard.writeText(secretUrl);
+      try {
+        await navigator.clipboard.writeText(secretUrl);
+        enqueueSnackbar("Secret link copied to clipboard!", {
+          variant: "info",
+        });
+      } catch {
+        enqueueSnackbar("Failed to copy link. Please copy manually.", {
+          variant: "error",
+        });
+      }
     }
-  }, [secretUrl]);
+  }, [secretUrl, enqueueSnackbar]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {

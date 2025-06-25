@@ -23,9 +23,11 @@ import {
   Login as LoginIcon,
 } from "@mui/icons-material";
 import { useAuthStore } from "@/stores";
+import { useSnackbar } from "notistack";
 
 export default function SignIn() {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
 
   // Zustand store state and actions
   const signInState = useAuthStore((state) => state.signIn);
@@ -49,13 +51,21 @@ export default function SignIn() {
         });
 
         if (result?.error) {
-          console.error("Sign in failed:", result.error);
+          enqueueSnackbar("Invalid email or password. Please try again.", {
+            variant: "error",
+          });
         } else {
+          enqueueSnackbar(
+            "Welcome back! You have been signed in successfully.",
+            { variant: "success" },
+          );
           signInActions.resetForm();
           router.push("/");
         }
-      } catch (error) {
-        console.error("Sign in error:", error);
+      } catch (err) {
+        enqueueSnackbar("An unexpected error occurred. Please try again.", {
+          variant: "error",
+        });
       }
     },
     [
@@ -64,6 +74,7 @@ export default function SignIn() {
       isFormValid,
       signInActions,
       router,
+      enqueueSnackbar,
     ],
   );
 
