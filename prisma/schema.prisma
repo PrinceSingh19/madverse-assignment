@@ -64,6 +64,8 @@ model User {
     password      String // For email/password authentication
     emailVerified DateTime?
     image         String?
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
     accounts      Account[]
     sessions      Session[]
     secrets       Secret[]

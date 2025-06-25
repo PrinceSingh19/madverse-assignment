@@ -5,6 +5,7 @@ type State = {
   content: string;
   password: string;
   oneTimeAccess: boolean;
+  expiresAt: Date | null;
   createdSecret: string | null;
 };
 
@@ -12,6 +13,7 @@ type Actions = {
   setContent: (content: string) => void;
   setPassword: (password: string) => void;
   setOneTimeAccess: (oneTimeAccess: boolean) => void;
+  setExpiresAt: (date: Date | null) => void;
   setCreatedSecret: (secretId: string) => void;
   resetForm: () => void;
   clearCreatedSecret: () => void;
@@ -25,6 +27,7 @@ export const useSecretStore = create<State & Actions>()(
     content: "",
     password: "",
     oneTimeAccess: false,
+    expiresAt: null,
     createdSecret: null,
 
     setContent: (content: string) =>
@@ -42,6 +45,11 @@ export const useSecretStore = create<State & Actions>()(
         state.oneTimeAccess = oneTimeAccess;
       }),
 
+    setExpiresAt: (date: Date | null) =>
+      set((state) => {
+        state.expiresAt = date;
+      }),
+
     setCreatedSecret: (secretId: string) =>
       set((state) => {
         state.createdSecret = secretId;
@@ -53,6 +61,7 @@ export const useSecretStore = create<State & Actions>()(
         state.content = "";
         state.password = "";
         state.oneTimeAccess = false;
+        state.expiresAt = null;
         state.createdSecret = createdSecret; // Keep the created secret for display
       }),
 

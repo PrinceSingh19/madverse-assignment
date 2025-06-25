@@ -15,6 +15,7 @@ import {
   Timer,
   VisibilityOff,
   Shield,
+  Dashboard as DashboardIcon,
 } from "@mui/icons-material";
 
 import { SecretForm } from "@/app/_components/secret-form";
@@ -142,6 +143,8 @@ export default async function Home() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: 2,
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -163,7 +166,18 @@ export default async function Home() {
                       </Typography>
                     </Box>
                   </Box>
-                  <SignOutButton />
+                  <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                    <Button
+                      component={Link}
+                      href="/dashboard"
+                      variant="outlined"
+                      startIcon={<DashboardIcon />}
+                      sx={{ minWidth: 140 }}
+                    >
+                      My Dashboard
+                    </Button>
+                    <SignOutButton />
+                  </Box>
                 </Box>
               </Paper>
 
