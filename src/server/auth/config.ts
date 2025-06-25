@@ -70,6 +70,10 @@ export const authConfig = {
   session: {
     strategy: "jwt",
   },
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/error",
+  },
   callbacks: {
     jwt: ({ token, user }) => {
       if (user) {
@@ -85,4 +89,6 @@ export const authConfig = {
       },
     }),
   },
+  debug: process.env.NODE_ENV === "development",
+  trustHost: true,
 } satisfies NextAuthConfig;
