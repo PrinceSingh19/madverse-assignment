@@ -1,0 +1,213 @@
+"use client";
+
+import { useCallback } from "react";
+import {
+  Box,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  FormControlLabel,
+  Checkbox,
+  InputAdornment,
+  Chip,
+  Alert,
+} from "@mui/material";
+import {
+  Lock as LockIcon,
+  Security as SecurityIcon,
+  Send as SendIcon,
+} from "@mui/icons-material";
+import { api } from "@/trpc/react";
+import { useSecretStore } from "@/stores";
+
+// Secret creation form
+export function SecretForm() {
+  const utils = api.useUtils();
+
+  // Zustand store state and actions
+  const formState = useSecretStore((state) => state.form);
+  const actions = useSecretStore((state) => state.actions);
+  const isFormValid = useSecretStore((state) => state.computed.isFormValid());
+  const secretUrl = useSecretStore((state) => state.computed.getSecretUrl());
+
+  const createSecret = api.secret.create.useMutation({
+    onSuccess: async (data) => {
+      await utils.secret.invalidate();
+      actions.setCreatedSecret(data.id);
+      actions.resetForm();
+    },
+    onError: (error) => {
+      console.error("Failed to create secret:", error.message);
+    },
+  });
+
+  // Event handlers
+  const copyToClipboard = useCallback(async () => {
+    if (secretUrl) {
+      await navigator.clipboard.writeText(secretUrl);
+    }
+  }, [secretUrl]);
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!isFormValid) return;
+
+      createSecret.mutate({
+        content: formState.content,
+        password: formState.password || undefined,
+        oneTimeAccess: formState.oneTimeAccess,
+      });
+    },
+    [
+      createSecret,
+      formState.content,
+      formState.password,
+      formState.oneTimeAccess,
+      isFormValid,
+    ],
+  );
+
+  return (
+    <Paper
+      elevation={8}
+      sx={{
+        width: "100%",
+        maxWidth: 700,
+        p: 6,
+        background: "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
+        border: "1px solid rgba(139, 92, 246, 0.1)",
+      }}
+    >
+      <Box sx={{ textAlign: "center", mb: 4 }}>
+        <SecurityIcon
+          sx={{
+            fontSize: 48,
+            color: "primary.main",
+            mb: 2,
+            filter: "drop-shadow(0 2px 4px rgba(139, 92, 246, 0.2))",
+          }}
+        />
+        <Typography
+          variant="h5"
+          component="h2"
+          sx={{ fontWeight: 700, color: "text.primary", mb: 1 }}
+        >
+          Create a Secret
+        </Typography>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          Share sensitive information securely
+        </Typography>
+      </Box>
+
+      {formState.createdSecret && secretUrl && (
+        <Alert
+          severity="success"
+          sx={{ mb: 3 }}
+          action={
+            <Button color="inherit" size="small" onClick={copyToClipboard}>
+              Copy Link
+            </Button>
+          }
+        >
+          <Typography variant="body2">
+            Secret created successfully! Share this link:
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{ wordBreak: "break-all", display: "block", mt: 1 }}
+          >
+            {secretUrl}
+          </Typography>
+        </Alert>
+      )}
+
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+      >
+        <TextField
+          fullWidth
+          multiline
+          rows={4}
+          label="Secret Message"
+          placeholder="Enter your secret message..."
+          value={formState.content}
+          onChange={(e) => actions.setContent(e.target.value)}
+          required
+          variant="outlined"
+          helperText="This message will be encrypted and can only be viewed by the recipient"
+        />
+
+        <TextField
+          fullWidth
+          type="password"
+          label="Password Protection (Optional)"
+          placeholder="Add an extra layer of security"
+          value={formState.password}
+          onChange={(e) => actions.setPassword(e.target.value)}
+          variant="outlined"
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockIcon sx={{ color: "text.secondary" }} />
+                </InputAdornment>
+              ),
+            },
+          }}
+          helperText="Recipients will need this password to view the secret"
+        />
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formState.oneTimeAccess}
+                onChange={(e) => actions.setOneTimeAccess(e.target.checked)}
+                color="primary"
+              />
+            }
+            label={
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="body2">One-time access only</Typography>
+                <Chip
+                  label="Recommended"
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
+              </Box>
+            }
+          />
+        </Box>
+
+        {createSecret.error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {createSecret.error.message}
+          </Alert>
+        )}
+
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          size="large"
+          disabled={createSecret.isPending || !isFormValid}
+          startIcon={<SendIcon />}
+          sx={{ py: 1.5, mt: 2 }}
+        >
+          {createSecret.isPending ? "Creating Secret..." : "Create Secret"}
+        </Button>
+      </Box>
+    </Paper>
+  );
+}

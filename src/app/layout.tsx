@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { TRPCReactProvider } from "@/trpc/react";
+import { MuiThemeProvider } from "@/app/_components/theme-provider";
 
 export const metadata: Metadata = {
   title: "Secret Sharing Platform",
@@ -20,7 +21,7 @@ export default function RootLayout({
         <SessionProvider>
           <TRPCReactProvider>
             <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-              {children}
+              <MuiThemeProvider>{children}</MuiThemeProvider>
             </AppRouterCacheProvider>
           </TRPCReactProvider>
         </SessionProvider>
