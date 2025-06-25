@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
 
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { TRPCReactProvider } from "@/trpc/react";
 
 export const metadata: Metadata = {
@@ -17,7 +18,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <SessionProvider>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <TRPCReactProvider>
+            <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+              {children}
+            </AppRouterCacheProvider>
+          </TRPCReactProvider>
         </SessionProvider>
       </body>
     </html>
