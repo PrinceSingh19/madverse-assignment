@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -9,6 +10,7 @@ import {
   Typography,
   Button,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import {
   Error as ErrorIcon,
@@ -23,7 +25,7 @@ const errorMessages = {
   Default: "An error occurred during authentication.",
 };
 
-export default function AuthErrorPage() {
+function ErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error") as keyof typeof errorMessages;
 
@@ -63,9 +65,7 @@ export default function AuthErrorPage() {
           </Box>
 
           <Alert severity="error" sx={{ mb: 3, textAlign: "left" }}>
-            <Typography variant="body1">
-              {errorMessage}
-            </Typography>
+            <Typography variant="body1">{errorMessage}</Typography>
             {error === "Configuration" && (
               <Typography variant="body2" sx={{ mt: 1 }}>
                 Please contact the administrator if this problem persists.
@@ -96,5 +96,30 @@ export default function AuthErrorPage() {
         </Paper>
       </Box>
     </Container>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    </Container>
+  );
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ErrorContent />
+    </Suspense>
   );
 }

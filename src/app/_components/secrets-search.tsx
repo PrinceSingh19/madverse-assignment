@@ -1,27 +1,15 @@
 "use client";
 
 import { useCallback } from "react";
-import {
-  Paper,
-  Box,
-  TextField,
-  InputAdornment,
-  IconButton,
-} from "@mui/material";
-import {
-  Search as SearchIcon,
-  Clear as ClearIcon,
-} from "@mui/icons-material";
+import { Paper, TextField, InputAdornment, IconButton } from "@mui/material";
+import { Search as SearchIcon, Clear as ClearIcon } from "@mui/icons-material";
 
 interface SecretsSearchProps {
   onSearch: (query: string) => void;
   searchQuery: string;
 }
 
-export function SecretsSearch({
-  onSearch,
-  searchQuery,
-}: SecretsSearchProps) {
+export function SecretsSearch({ onSearch, searchQuery }: SecretsSearchProps) {
   const handleSearchChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onSearch(event.target.value);
