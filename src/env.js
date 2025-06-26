@@ -4,6 +4,7 @@ import { z } from "zod";
 export const env = createEnv({
   //server side env variables
   server: {
+    NEXTAUTH_TRUST_HOST: z.boolean().default(true),
     AUTH_SECRET:
       process.env.NODE_ENV === "production"
         ? z.string()
@@ -25,6 +26,7 @@ export const env = createEnv({
 
   //runtime env variables
   runtimeEnv: {
+    NEXTAUTH_TRUST_HOST: process.env.NEXTAUTH_TRUST_HOST,
     AUTH_SECRET: process.env.AUTH_SECRET,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
